@@ -1,6 +1,6 @@
 package com.minesweeper.client.api.response
 
-import java.util.Date
+import org.joda.time.LocalDateTime
 
-case class ErrorResponse (message: String, status: String, timestamp: Date)
+case class ErrorResponse (message: String, status: String, timestamp: LocalDateTime)
 
