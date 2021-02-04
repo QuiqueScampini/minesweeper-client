@@ -15,10 +15,12 @@ class HttpClient(url: String) {
 
   implicit val formats: Formats = DefaultFormats
 
+
   val basePath = "/minesweeper/game"
   val defaultEndpoint = s"${url}${basePath}"
 
   val client = new OkHttpClient()
+  val jsonParser = new JsonParser()
 
   def retrieveAllGames(): ApiClientGamesResponse = {
     val request = createRequest(defaultEndpoint,"GET")
@@ -71,17 +73,17 @@ class HttpClient(url: String) {
   def parseGamesResponse(response: Response): ApiClientGamesResponse = {
     val jsonResponse = response.body().string()
     response.code() match {
-      case 200 => api.response.ApiClientGamesResponse(parseGames(jsonResponse),None)
+      case 200 => api.response.ApiClientGamesResponse(jsonParser.parseGames(jsonResponse),None)
       case _ =>
-        api.response.ApiClientGamesResponse(None,parseError(jsonResponse))
+        api.response.ApiClientGamesResponse(None,jsonParser.parseError(jsonResponse))
     }
   }
 
   def parseGameResponse(response: Response): ApiClientGameResponse = {
     val jsonResponse = response.body().string()
     response.code() match {
-      case 200 => ApiClientGameResponse(None,None)
-      case _ => api.response.ApiClientGameResponse(None,parseError(jsonResponse))
+      case 200 => ApiClientGameResponse(jsonParser.parseGame(jsonResponse),None)
+      case _ => api.response.ApiClientGameResponse(None,jsonParser.parseError(jsonResponse))
     }
   }
 
