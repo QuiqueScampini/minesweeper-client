@@ -6,3 +6,5 @@
 project/project
 project/target
 /.bsp
+target
+/.target
