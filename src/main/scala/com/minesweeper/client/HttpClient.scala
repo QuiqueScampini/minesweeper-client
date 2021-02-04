@@ -1,6 +1,6 @@
 package com.minesweeper.client
 
-import com.minesweeper.client.JsonParser.{parseError, parseGames}
+import com.minesweeper.client.JsonParser.{parseError, parseGame, parseGames}
 import com.minesweeper.client.api.request.{ActionRequest, GameRequest}
 import com.minesweeper.client.api.response.{ApiClientGameResponse, ApiClientGamesResponse}
 import com.squareup.okhttp._
@@ -20,7 +20,6 @@ class HttpClient(url: String) {
   val defaultEndpoint = s"${url}${basePath}"
 
   val client = new OkHttpClient()
-  val jsonParser = new JsonParser()
 
   def retrieveAllGames(): ApiClientGamesResponse = {
     val request = createRequest(defaultEndpoint,"GET")
@@ -73,17 +72,17 @@ class HttpClient(url: String) {
   def parseGamesResponse(response: Response): ApiClientGamesResponse = {
     val jsonResponse = response.body().string()
     response.code() match {
-      case 200 => api.response.ApiClientGamesResponse(jsonParser.parseGames(jsonResponse),None)
+      case 200 => api.response.ApiClientGamesResponse(parseGames(jsonResponse),None)
       case _ =>
-        api.response.ApiClientGamesResponse(None,jsonParser.parseError(jsonResponse))
+        api.response.ApiClientGamesResponse(None,parseError(jsonResponse))
     }
   }
 
   def parseGameResponse(response: Response): ApiClientGameResponse = {
     val jsonResponse = response.body().string()
     response.code() match {
-      case 200 => ApiClientGameResponse(jsonParser.parseGame(jsonResponse),None)
-      case _ => api.response.ApiClientGameResponse(None,jsonParser.parseError(jsonResponse))
+      case 200 => ApiClientGameResponse(parseGame(jsonResponse),None)
+      case _ => api.response.ApiClientGameResponse(None,parseError(jsonResponse))
     }
   }
 
