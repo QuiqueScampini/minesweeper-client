@@ -1,6 +1,6 @@
 package com.minesweeper.client
 
-import com.minesweeper.api.response.{ApiClientGameResponse, ApiClientGamesResponse}
+import com.minesweeper.client.api.response.{ApiClientGameResponse, ApiClientGamesResponse}
 
 class MinesweeperGameClient(url: String = "http://localhost:8080") {
 

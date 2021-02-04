@@ -1,8 +1,8 @@
 package com.minesweeper.client
 
-import com.minesweeper.api.request.{ActionRequest, GameRequest}
-import com.minesweeper.api.response.{ApiClientGameResponse, ApiClientGamesResponse}
 import com.minesweeper.client.JsonParser.{parseError, parseGames}
+import com.minesweeper.client.api.request.{ActionRequest, GameRequest}
+import com.minesweeper.client.api.response.{ApiClientGameResponse, ApiClientGamesResponse}
 import com.squareup.okhttp._
 import org.json4s.jackson.Serialization.write
 import org.json4s.{DefaultFormats, Formats}
@@ -71,9 +71,9 @@ class HttpClient(url: String) {
   def parseGamesResponse(response: Response): ApiClientGamesResponse = {
     val jsonResponse = response.body().string()
     response.code() match {
-      case 200 => ApiClientGamesResponse(parseGames(jsonResponse),None)
+      case 200 => api.response.ApiClientGamesResponse(parseGames(jsonResponse),None)
       case _ =>
-        ApiClientGamesResponse(None,parseError(jsonResponse))
+        api.response.ApiClientGamesResponse(None,parseError(jsonResponse))
     }
   }
 
@@ -81,7 +81,7 @@ class HttpClient(url: String) {
     val jsonResponse = response.body().string()
     response.code() match {
       case 200 => ApiClientGameResponse(None,None)
-      case _ => ApiClientGameResponse(None,parseError(jsonResponse))
+      case _ => api.response.ApiClientGameResponse(None,parseError(jsonResponse))
     }
   }
 
