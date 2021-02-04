@@ -1,16 +1,19 @@
 package com.minesweeper.client
 
-import com.minesweeper.api.request.GameRequest
+import com.minesweeper.api.request.{ActionRequest, GameRequest}
 import com.minesweeper.api.response.{ApiClientGameResponse, ApiClientGamesResponse}
-import com.minesweeper.client.JsonParser.parseError
+import com.minesweeper.client.JsonParser.{parseError, parseGames}
 import com.squareup.okhttp._
 import org.json4s.jackson.Serialization.write
+import org.json4s.{DefaultFormats, Formats}
 
 
 
 class HttpClient(url: String) {
 
-  val  jsonType : MediaType = MediaType.parse("application/json; charset=utf-8");
+  val  jsonType : MediaType = MediaType.parse("application/json; charset=utf-8")
+
+  implicit val formats: Formats = DefaultFormats
 
   val basePath = "/minesweeper/game"
   val defaultEndpoint = s"${url}${basePath}"
@@ -44,15 +47,17 @@ class HttpClient(url: String) {
   }
 
   def reveal(id: Int, row: Int, col: Int): ApiClientGameResponse = {
-    val requestBody = gameActionBody("REVEAL", col, row)
-    val request = createRequest(defaultEndpoint, "PUT", requestBody)
+    val action = write(ActionRequest("REVEAL",row,col))
+    val requestBody = RequestBody.create(jsonType,action)
+    val request = createRequest(s"${defaultEndpoint}/${id}", "PUT", requestBody)
     val response = executeRequest(request)
     parseGameResponse(response)
   }
 
   def flag(id: Int, row: Int, col: Int): ApiClientGameResponse = {
-    val requestBody = gameActionBody("FLAG", col, row)
-    val request = createRequest(defaultEndpoint, "PUT", requestBody)
+    val action = write(ActionRequest("FLAG",row,col))
+    val requestBody = RequestBody.create(jsonType,action)
+    val request = createRequest(s"${defaultEndpoint}/${id}", "PUT", requestBody)
     val response = executeRequest(request)
     parseGameResponse(response)
   }
@@ -66,7 +71,7 @@ class HttpClient(url: String) {
   def parseGamesResponse(response: Response): ApiClientGamesResponse = {
     val jsonResponse = response.body().string()
     response.code() match {
-      case 200 => ApiClientGamesResponse(None,None)
+      case 200 => ApiClientGamesResponse(parseGames(jsonResponse),None)
       case _ =>
         ApiClientGamesResponse(None,parseError(jsonResponse))
     }
@@ -90,12 +95,4 @@ class HttpClient(url: String) {
       .method(method, requestBody)
       .build()
   }
-
-  def gameRequestBody(rows: Int, cols: Int, mines: Int, user: String): RequestBody =
-    RequestBody.create(jsonType,
-      s"""{\"cols\":${cols},\"mines\": ${mines},\"rows\": ${rows},\"user\": \"${user}\"}""")
-
-  def gameActionBody(action: String, col: Int, row: Int): RequestBody =
-    RequestBody.create(jsonType, s"""{\"action\":\"${action}\",\"col\": ${col},\"row\": \"${row}\"}""")
-
 }
